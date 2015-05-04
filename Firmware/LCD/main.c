@@ -13,10 +13,10 @@
 /* Include core modules */
 #include "stm32f4xx.h"
 /* Include my libraries here */
-#include "defines.h"
 #include "tm_stm32f4_ili9341.h"
 #include "tm_stm32f4_fonts.h"
 #include <stdio.h>
+
 
 int main(void) {
 	/* Initialize system */
