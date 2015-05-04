@@ -25,10 +25,9 @@
  
 #include "stm32f4xx.h"
 #include "ov7670_control.h"
-#include "lcd_ili9341.h"
-#include "lcd_fonts.h"
-#include "lcd_spi.h"
-#include "fmc_sdram.h"
+#include "tm_stm32f4_ili9341.h"
+#include "tm_stm32f4_ili9341.h"
+#include "stm32f4xx_hal_sdram.h"
 #include <stdio.h>
  
 /* Main program loop */

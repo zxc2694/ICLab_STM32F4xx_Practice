@@ -53,6 +53,12 @@ SRC+=$(ST_LIB)/src/misc.c \
 	$(ST_LIB)/src/stm32f4xx_i2c.c
 
 #Major programs
+#SRC+=./ov7670_control.h
+#SRC+=./ov7670_control.c
+#SRC+=./stm32f4xx_hal_sdram.h
+#SRC+=./stm32f4xx_hal_sdram.c
+#SRC+=./stm32f4xx_hal.h
+#SRC+=./stm32f4xx_hal.c
 SRC+=./main.c
 
 #======================================================================#
