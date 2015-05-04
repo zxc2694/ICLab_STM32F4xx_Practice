@@ -34,7 +34,7 @@
 #include "stm32f4xx_dma.h"
 #include "stm32f4xx_dcmi.h"
 #include "tm_stm32f4_ili9341.h"
-#include "stm32f4xx_hal_sdram.h"
+//#include "stm32f4xx_hal_sram.h"
  
 // SCCB write address
 #define SCCB_REG_ADDR 			0x01

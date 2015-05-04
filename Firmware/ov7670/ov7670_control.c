@@ -24,6 +24,8 @@
 */
  
 #include "ov7670_control.h"
+#include "stm32f4xx_dcmi.h"
+#include "stm32f4xx_rcc.h"
  
 const uint8_t OV7670_reg [OV7670_REG_NUM][2] = {
 	{0x12, 0x80},		//Reset registers
@@ -350,7 +352,8 @@ void DCMI_DMA_Init(void){
     DMA_DeInit(DMA2_Stream1);
 	DMA_InitStructure.DMA_Channel = DMA_Channel_1;
     DMA_InitStructure.DMA_PeripheralBaseAddr = DCMI_DR_ADDRESS;
-    DMA_InitStructure.DMA_Memory0BaseAddr = SDRAM_LCD_START1;
+    DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)0x60020000;
+//    DMA_InitStructure.DMA_Memory0BaseAddr = SDRAM_LCD_START1;
     DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory;
     DMA_InitStructure.DMA_BufferSize = IMG_HEIGHT*IMG_WIDTH*BYTES_PER_PX/4;
     DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
@@ -375,7 +378,11 @@ void DCMI_DMA_Init(void){
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 }
- 
+ void delay(uint32_t count)
+{
+	while(count--);
+}
+
 uint8_t OV7670_Config(void){
 	uint8_t data, i, err;
  
@@ -387,8 +394,8 @@ uint8_t OV7670_Config(void){
 		if (err)
 			break;
  
-    Delay_ms(10);
-    LCD_ILI9341_DrawLine(70+i*100/OV7670_REG_NUM, 150, 70+i*100/OV7670_REG_NUM, 150+18, ILI9341_COLOR_BLACK);
+    delay(1000000L);
+    TM_ILI9341_DrawLine(70+i*100/OV7670_REG_NUM, 150, 70+i*100/OV7670_REG_NUM, 150+18, ILI9341_COLOR_BLACK);
 	}
  
 	return err;

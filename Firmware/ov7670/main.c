@@ -26,8 +26,7 @@
 #include "stm32f4xx.h"
 #include "ov7670_control.h"
 #include "tm_stm32f4_ili9341.h"
-#include "tm_stm32f4_ili9341.h"
-#include "stm32f4xx_hal_sdram.h"
+//#include "stm32f4xx_hal_sram.h"
 #include <stdio.h>
  
 /* Main program loop */
@@ -35,7 +34,7 @@ int main(void){
 
 	// System initialization
 	SystemInit();
-	FMC_SDRAM_Init();
+//	FMC_SDRAM_Init();
 	Camera_Init();
     TM_ILI9341_Init();
     
@@ -59,10 +58,11 @@ int main(void){
 	  DCMI_CaptureCmd(ENABLE);
 	}
 }
- 
+/* SDRAM_LCD_START1 = (uint32_t)0x60020000; */
+/* SDRAM_LCD_START2 = (uint32_t)0x00000000; */
 /* DCMI DMA interrupt */
 void DMA2_Stream1_IRQHandler(void){
-    uint32_t n, i, buffer, *lcd_sdram1 = (uint32_t*) SDRAM_LCD_START1, *lcd_sdram2 = (uint32_t*) SDRAM_LCD_START2;
+    uint32_t n, i, buffer, *lcd_sdram1 = (uint32_t*) (uint32_t)0x60020000, *lcd_sdram2 = (uint32_t*) 0x00000000;
  
     // DMA complete
 	if(DMA_GetITStatus(DMA2_Stream1,DMA_IT_TCIF1) == SET){
@@ -80,16 +80,16 @@ void DMA2_Stream1_IRQHandler(void){
         }
  
         // Prepare LCD for image
-        LCD_ILI9341_Rotate(LCD_ILI9341_Orientation_Landscape_2);
-        LCD_ILI9341_SetCursorPosition(0, 0, IMG_HEIGHT - 1, IMG_WIDTH - 1);
+        TM_ILI9341_Rotate(TM_ILI9341_Orientation_Landscape_2);
+        TM_ILI9341_SetCursorPosition(0, 0, IMG_HEIGHT - 1, IMG_WIDTH - 1);
  
-        LCD_ILI9341_SendCommand(ILI9341_GRAM);
+        TM_ILI9341_SendCommand(0x2C); // ILI9341_GRAM = 0x2C
  
         // SPI send
-        ILI9341_WRX_SET;
-        ILI9341_CS_RESET;
+        GPIO_SetBits(ILI9341_WRX_PORT, ILI9341_WRX_PIN); // ILI9341_WRX_SET;      
+        GPIO_ResetBits(ILI9341_CS_PORT, ILI9341_CS_PIN); // ILI9341_CS_RESET;
  
-        SPI_DMA_init(lcd_sdram2);
+//        SPI_DMA_init(lcd_sdram2);
         DMA_Cmd(DMA2_Stream4, ENABLE);
  
 		// Clear IRQ flag
@@ -100,7 +100,7 @@ void DMA2_Stream1_IRQHandler(void){
 /* LCD SPI interrupt */
 void DMA2_Stream4_IRQHandler(void){
 	static uint8_t n = 0;
-	uint32_t *lcd_sdram2 = (uint32_t*) SDRAM_LCD_START2;
+	uint32_t *lcd_sdram2 = (uint32_t*)0x00000000;
  
 	// DMA_SPI complete
 	if(DMA_GetITStatus(DMA2_Stream4,DMA_IT_TCIF4) == SET){
@@ -111,17 +111,17 @@ void DMA2_Stream4_IRQHandler(void){
  
         switch(n){
             case 0:
-                SPI_DMA_init(lcd_sdram2 + IMG_WIDTH*IMG_HEIGHT*BYTES_PER_PX/3/4);
+//                SPI_DMA_init(lcd_sdram2 + IMG_WIDTH*IMG_HEIGHT*BYTES_PER_PX/3/4);
                 DMA_Cmd(DMA2_Stream4, ENABLE);
                 n++;
                 break;
             case 1:
-                SPI_DMA_init(lcd_sdram2 + 2*IMG_WIDTH*IMG_HEIGHT*BYTES_PER_PX/3/4);
+ //               SPI_DMA_init(lcd_sdram2 + 2*IMG_WIDTH*IMG_HEIGHT*BYTES_PER_PX/3/4);
                 DMA_Cmd(DMA2_Stream4, ENABLE);
                 n++;
                 break;
             case 2:
-                ILI9341_CS_SET;
+                GPIO_SetBits(ILI9341_CS_PORT, ILI9341_CS_PIN); // ILI9341_CS_SET;
                 DMA_Cmd(DMA2_Stream1, ENABLE);
                 DCMI_CaptureCmd(ENABLE);
                 n=0;
