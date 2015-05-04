@@ -25,6 +25,7 @@ CFLAGS+=-Wl,-T,stm32_flash.ld
 
 #Stm32 libraries
 ST_LIB=../Libraries/STM32F4xx_StdPeriph_Driver
+#HAL=../Libraries/stm32f4-HAL
 CFLAGS+=-I../Libraries/CMSIS/ST/STM32F4xx/Include
 
 #CMSIS libraries
@@ -32,6 +33,9 @@ CFLAGS+=-I../Libraries/CMSIS/Include
 
 #StdPeriph includes
 CFLAGS+=-I$(ST_LIB)/inc
+
+#HAL includes
+#CFLAGS+=-I$(HAL)/inc
 
 #======================================================================#
 #Source code
@@ -46,19 +50,22 @@ SRC+=$(ST_LIB)/src/misc.c \
 	$(ST_LIB)/src/stm32f4xx_usart.c \
 	$(ST_LIB)/src/stm32f4xx_tim.c\
 	$(ST_LIB)/src/stm32f4xx_spi.c\
+	$(ST_LIB)/src/stm32f4xx_dcmi.c\
 	$(ST_LIB)/src/tm_stm32f4_fonts.c\
 	$(ST_LIB)/src/tm_stm32f4_gpio.c\
 	$(ST_LIB)/src/tm_stm32f4_spi.c\
 	$(ST_LIB)/src/tm_stm32f4_ili9341.c\
 	$(ST_LIB)/src/stm32f4xx_i2c.c
 
+#SRC+=$(HAL)/src/stm32f4xx_hal.c\
+#	$(HAL)/src/stm32f4xx_hal_rcc.c\
+#	$(HAL)/src/stm32f4xx_hal_sram.c\
+#	$(HAL)/src/stm32f4xx_hal_rcc_ex.c
+#	$(HAL)/src/stm32f4xx_hal_rcc.c\
+
 #Major programs
-#SRC+=./ov7670_control.h
-#SRC+=./ov7670_control.c
-#SRC+=./stm32f4xx_hal_sdram.h
-#SRC+=./stm32f4xx_hal_sdram.c
-#SRC+=./stm32f4xx_hal.h
-#SRC+=./stm32f4xx_hal.c
+SRC+=./ov7670_control.h
+SRC+=./ov7670_control.c
 SRC+=./main.c
 
 #======================================================================#
