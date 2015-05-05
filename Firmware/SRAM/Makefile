@@ -44,6 +44,7 @@ SRC+=$(ST_LIB)/src/misc.c \
 	$(ST_LIB)/src/stm32f4xx_gpio.c \
 	$(ST_LIB)/src/stm32f4xx_usart.c \
 	$(ST_LIB)/src/stm32f4xx_tim.c\
+	$(ST_LIB)/src/stm32f4xx_fmc.c\
 	$(ST_LIB)/src/stm32f4xx_spi.c\
 	$(ST_LIB)/src/tm_stm32f4_disco.c\
 	$(ST_LIB)/src/tm_stm32f4_gpio.c\

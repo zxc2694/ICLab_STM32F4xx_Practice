@@ -51,9 +51,12 @@ SRC+=$(ST_LIB)/src/misc.c \
 	$(ST_LIB)/src/stm32f4xx_tim.c\
 	$(ST_LIB)/src/stm32f4xx_spi.c\
 	$(ST_LIB)/src/stm32f4xx_dcmi.c\
+	$(ST_LIB)/src/stm32f4xx_fmc.c\
 	$(ST_LIB)/src/tm_stm32f4_fonts.c\
 	$(ST_LIB)/src/tm_stm32f4_gpio.c\
 	$(ST_LIB)/src/tm_stm32f4_spi.c\
+	$(ST_LIB)/src/tm_stm32f4_spi_dma.c\
+	$(ST_LIB)/src/tm_stm32f4_sdram.c\
 	$(ST_LIB)/src/tm_stm32f4_ili9341.c\
 	$(ST_LIB)/src/stm32f4xx_i2c.c
 
