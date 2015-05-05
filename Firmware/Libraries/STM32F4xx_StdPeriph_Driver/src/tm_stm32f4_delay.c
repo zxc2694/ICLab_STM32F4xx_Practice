@@ -18,9 +18,9 @@
  */
 #include "tm_stm32f4_delay.h"
 
-extern __IO uint32_t TM_TimingDelay = 0;
-extern __IO uint32_t TM_Time = 0;
-extern __IO uint32_t TM_Time2 = 0;
+__IO uint32_t TM_TimingDelay = 0;
+__IO uint32_t TM_Time = 0;
+__IO uint32_t TM_Time2 = 0;
 uint8_t TM_DELAY_Initialized = 0;
 volatile uint32_t mult;
 
@@ -42,7 +42,7 @@ void SysTick_Handler(void) {
 	}
 	
 	/* Call user function */
-	TM_DELAY_1msHandler();
+//	TM_DELAY_1msHandler();
 }
 
 void TM_DELAY_Init(void) {
