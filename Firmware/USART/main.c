@@ -22,8 +22,8 @@ void init_GPIO()
 		.GPIO_PuPd = GPIO_PuPd_UP
 	};
 
-	GPIO_PinAFConfig(GPIOC, GPIO_PinSource10, GPIO_AF_USART3);
-	GPIO_PinAFConfig(GPIOC, GPIO_PinSource11, GPIO_AF_USART3);
+	GPIO_PinAFConfig(GPIOB, GPIO_PinSource10, GPIO_AF_USART3);
+	GPIO_PinAFConfig(GPIOB, GPIO_PinSource11, GPIO_AF_USART3);
 
 	GPIO_Init(GPIOB, &GPIO_InitStruct);
 }
