@@ -58,6 +58,7 @@ SRC+=$(ST_LIB)/src/misc.c \
 	$(ST_LIB)/src/tm_stm32f4_spi_dma.c\
 	$(ST_LIB)/src/tm_stm32f4_sdram.c\
 	$(ST_LIB)/src/tm_stm32f4_ili9341.c\
+	$(ST_LIB)/src/string.c\
 	$(ST_LIB)/src/stm32f4xx_i2c.c
 
 #SRC+=$(HAL)/src/stm32f4xx_hal.c\
