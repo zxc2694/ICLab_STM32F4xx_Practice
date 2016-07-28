@@ -52,30 +52,30 @@ int main(void)
 	TM_DISCO_LedInit(); //Initialize leds
 
 	if (TM_SDRAM_Init()) { //Initialize SDRAM
-//		TM_DISCO_LedOn(LED_GREEN);
+		TM_DISCO_LedOn(LED_GREEN);
 	} 
 	else {
-	//	TM_DISCO_LedOn(LED_RED);
+		TM_DISCO_LedOn(LED_RED);
 	}
 	Delayms(20);
 	
-	write = 1234;
+	write = 5;
 
 	TM_SDRAM_Write16(0x3214, write); // Write 16bit value to SDRAM at location 0x3214
 	
 	read = TM_SDRAM_Read16(0x3214); // Read from location 0x3214 
 	
 	
-	if (write == read) { /* Check if read data is the same as written data */
-		TM_DISCO_LedToggle(LED_GREEN | LED_RED);
-		Delayms(50);
-		TM_DISCO_LedToggle(LED_GREEN | LED_RED);
-		Delayms(50);
-		TM_DISCO_LedToggle(LED_GREEN | LED_RED);
-		Delayms(50);
-		TM_DISCO_LedToggle(LED_GREEN | LED_RED);
-		Delayms(50);
-	}	
+	// if (write == read) { /* Check if read data is the same as written data */
+	// 	TM_DISCO_LedToggle(LED_GREEN | LED_RED);
+	// 	Delayms(50);
+	// 	TM_DISCO_LedToggle(LED_GREEN | LED_RED);
+	// 	Delayms(50);
+	// 	TM_DISCO_LedToggle(LED_GREEN | LED_RED);
+	// 	Delayms(50);
+	// 	TM_DISCO_LedToggle(LED_GREEN | LED_RED);
+	// 	Delayms(50);
+	// }	
 	while(1) {
 		send_data(read);
 		send_data("\n\r");	

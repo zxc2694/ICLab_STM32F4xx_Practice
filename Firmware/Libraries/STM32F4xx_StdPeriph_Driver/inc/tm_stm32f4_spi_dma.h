@@ -3,7 +3,7 @@
  * @email   tilen@majerle.eu
  * @website http://stm32f4-discovery.com
  * @link    http://stm32f4-discovery.com/2015/04/library-56-extend-spi-with-dma-for-stm32f4xx
- * @version v1.0
+ * @version v1.1.1
  * @ide     Keil uVision
  * @license GNU GPL v3
  * @brief   DMA functionality for TM SPI library
@@ -28,11 +28,11 @@
 @endverbatim
  */
 #ifndef TM_SPI_DMA_H
-#define TM_SPI_DMA_H 100
+#define TM_SPI_DMA_H 111
 
 /* C++ detection */
 #ifdef __cplusplus
-extern C {
+extern "C" {
 #endif
 
 /**
@@ -42,12 +42,12 @@ extern C {
 
 /**
  * @defgroup TM_SPI_DMA
- * @brief    DMA functionality for TM SPI library - http://stm32f4-discovery.com/2015/04/library-56-extend-spi-with-dma-for-stm32f4xx
+ * @brief    DMA functionality for @ref TM_SPI library - http://stm32f4-discovery.com/2015/04/library-56-extend-spi-with-dma-for-stm32f4xx
  * @{
  *
  * This library allows you to use DMA with SPI peripheral.
  *
- * It can send, receive or transmit data over SPI with DMA feature.
+ * It can send (TX only), receive (RX only) or transmit (TX and RX) data over SPI with DMA feature.
  *
  * \par 
  *
@@ -69,6 +69,14 @@ SPI6     | DMA2 | DMA Stream 5  | DMA Channel 1  | DMA Stream 6  | DMA Channel 0
  * \par Changelog
  *
 @verbatim
+ Version 1.1.1
+  - August 11, 2015
+  - Fixed bug with default TX Stream value for SPI4
+
+ Version 1.1
+  - June 06, 2015
+  - Added TM DMA library support for future purpose
+ 
  Version 1.0
   - First release
 @endverbatim
@@ -79,14 +87,15 @@ SPI6     | DMA2 | DMA Stream 5  | DMA Channel 1  | DMA Stream 6  | DMA Channel 0
  - STM32F4xx
  - STM32F4xx DMA
  - defines.h
+ - TM DMA
  - TM SPI
  - stdlib.h
 @endverbatim
  */
-
 #include "stm32f4xx.h"
 #include "stm32f4xx_dma.h"
 #include "defines.h"
+#include "tm_stm32f4_dma.h"
 #include "tm_stm32f4_spi.h"
 #include "stdlib.h"
 
@@ -128,7 +137,7 @@ SPI6     | DMA2 | DMA Stream 5  | DMA Channel 1  | DMA Stream 6  | DMA Channel 0
 
 /* SPI4 TX and RX default settings */
 #ifndef SPI4_DMA_TX_STREAM
-#define SPI4_DMA_TX_STREAM    DMA2_Stream0
+#define SPI4_DMA_TX_STREAM    DMA2_Stream1
 #define SPI4_DMA_TX_CHANNEL   DMA_Channel_4
 #endif
 #ifndef SPI4_DMA_RX_STREAM
@@ -249,6 +258,28 @@ uint8_t TM_SPI_DMA_Transmit(SPI_TypeDef* SPIx, uint8_t* TX_Buffer, uint8_t* RX_B
 #define TM_SPI_DMA_Receive(SPIx, RX_Buffer, count)   (TM_SPI_DMA_Transmit(SPIx, NULL, RX_Buffer, count))
 
 /**
+ * @brief  Sends one byte value multiple times over SPI with DMA
+ * @param  SPIx: Pointer to SPIx where DMA transmission will happen
+ * @param  value: Byte value to be sent
+ * @param  count: Number of bytes with value of @arg value will be sent
+ * @retval Transmission started status:
+ *            - 0: DMA has not started with sending data
+ *            - > 0: DMA has started with sending data
+ */
+uint8_t TM_SPI_DMA_SendByte(SPI_TypeDef* SPIx, uint8_t value, uint16_t count);
+
+/**
+ * @brief  Sends one half word value multiple times over SPI with DMA
+ * @param  SPIx: Pointer to SPIx where DMA transmission will happen
+ * @param  value: Byte value to be sent
+ * @param  count: Number of half words with value of @arg value will be sent
+ * @retval Transmission started status:
+ *            - 0: DMA has not started with sending data
+ *            - > 0: DMA has started with sending data
+ */
+uint8_t TM_SPI_DMA_SendHalfWord(SPI_TypeDef* SPIx, uint16_t value, uint16_t count);
+
+/**
  * @brief  Checks if SPI DMA is still sending/receiving data
  * @param  *SPIx: Pointer to SPIx where you want to enable DMA TX mode
  * @retval Sending status:
@@ -256,6 +287,34 @@ uint8_t TM_SPI_DMA_Transmit(SPI_TypeDef* SPIx, uint8_t* TX_Buffer, uint8_t* RX_B
  *            - > 0: SPI DMA is still sending data 
  */
 uint8_t TM_SPI_DMA_Working(SPI_TypeDef* SPIx);
+
+/**
+ * @brief  Gets TX DMA stream for specific SPI 
+ * @param  *SPIx: Pointer to SPIx peripheral where you want to get TX stream
+ * @retval Pointer to SPI DMA TX stream
+ */
+DMA_Stream_TypeDef* TM_SPI_DMA_GetStreamTX(SPI_TypeDef* SPIx);
+
+/**
+ * @brief  Gets RX DMA stream for specific SPI 
+ * @param  *SPIx: Pointer to SPIx peripheral where you want to get RX stream
+ * @retval Pointer to SPI DMA RX stream
+ */
+DMA_Stream_TypeDef* TM_SPI_DMA_GetStreamRX(SPI_TypeDef* SPIx);
+
+/**
+ * @brief  Enables DMA stream interrupts for specific SPI
+ * @param  *SPIx: Pointer to SPIx peripheral where you want to enable DMA stream interrupts
+ * @retval None
+ */
+void TM_SPI_DMA_EnableInterrupts(SPI_TypeDef* SPIx);
+
+/**
+ * @brief  Disables DMA stream interrupts for specific SPI
+ * @param  *SPIx: Pointer to SPIx peripheral where you want to disable DMA stream interrupts
+ * @retval None
+ */
+void TM_SPI_DMA_DisableInterrupts(SPI_TypeDef* SPIx);
 
 /**
  * @}

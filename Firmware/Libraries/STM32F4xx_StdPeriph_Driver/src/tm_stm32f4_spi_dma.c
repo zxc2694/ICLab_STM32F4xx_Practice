@@ -24,6 +24,8 @@ typedef struct {
 	DMA_Stream_TypeDef* TX_Stream;
 	uint32_t RX_Channel;
 	DMA_Stream_TypeDef* RX_Stream;
+	uint32_t Dummy32;
+	uint16_t Dummy16;
 } TM_SPI_DMA_INT_t;
 
 /* Private variables */
@@ -45,9 +47,9 @@ static TM_SPI_DMA_INT_t SPI5_DMA_INT = {SPI5_DMA_TX_CHANNEL, SPI5_DMA_TX_STREAM,
 #ifdef SPI6
 static TM_SPI_DMA_INT_t SPI6_DMA_INT = {SPI6_DMA_TX_CHANNEL, SPI6_DMA_TX_STREAM, SPI6_DMA_RX_CHANNEL, SPI6_DMA_RX_STREAM};
 #endif
+
 /* Private DMA structure */
 static DMA_InitTypeDef DMA_InitStruct;
-uint32_t SPI_DMA_Dummy = 0x00;
 
 /* Private functions */
 static TM_SPI_DMA_INT_t* TM_SPI_DMA_INT_GetSettings(SPI_TypeDef* SPIx);
@@ -126,7 +128,11 @@ uint8_t TM_SPI_DMA_Transmit(SPI_TypeDef* SPIx, uint8_t* TX_Buffer, uint8_t* RX_B
 	}
 	
 	/* Set dummy memory to default */
-	SPI_DMA_Dummy = 0x00;
+	Settings->Dummy16 = 0x00;
+	
+	/* Set memory size */
+	DMA_InitStruct.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+	DMA_InitStruct.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
 	
 	/* Set DMA peripheral address and count */
 	DMA_InitStruct.DMA_PeripheralBaseAddr = (uint32_t) &SPIx->DR;
@@ -137,15 +143,15 @@ uint8_t TM_SPI_DMA_Transmit(SPI_TypeDef* SPIx, uint8_t* TX_Buffer, uint8_t* RX_B
 	DMA_InitStruct.DMA_DIR = DMA_DIR_MemoryToPeripheral;
 	
 	if (TX_Buffer != NULL) {
-		DMA_InitStruct.DMA_Memory0BaseAddr = (uint32_t) &TX_Buffer[0];
+		DMA_InitStruct.DMA_Memory0BaseAddr = (uint32_t) TX_Buffer;
 		DMA_InitStruct.DMA_MemoryInc = DMA_MemoryInc_Enable;
 	} else {
-		DMA_InitStruct.DMA_Memory0BaseAddr = (uint32_t) &SPI_DMA_Dummy;
+		DMA_InitStruct.DMA_Memory0BaseAddr = (uint32_t) &Settings->Dummy32;
 		DMA_InitStruct.DMA_MemoryInc = DMA_MemoryInc_Disable;
 	}
 	
 	/* Deinit first TX stream */
-	DMA_DeInit(Settings->TX_Stream);
+	TM_DMA_ClearFlag(Settings->TX_Stream, DMA_FLAG_ALL);
 	
 	/* Init TX stream */
 	DMA_Init(Settings->TX_Stream, &DMA_InitStruct);	
@@ -155,15 +161,15 @@ uint8_t TM_SPI_DMA_Transmit(SPI_TypeDef* SPIx, uint8_t* TX_Buffer, uint8_t* RX_B
 	DMA_InitStruct.DMA_DIR = DMA_DIR_PeripheralToMemory;
 	
 	if (RX_Buffer != NULL) {
-		DMA_InitStruct.DMA_Memory0BaseAddr = (uint32_t) &RX_Buffer[0];
+		DMA_InitStruct.DMA_Memory0BaseAddr = (uint32_t) RX_Buffer;
 		DMA_InitStruct.DMA_MemoryInc = DMA_MemoryInc_Enable;
 	} else {
-		DMA_InitStruct.DMA_Memory0BaseAddr = (uint32_t) &SPI_DMA_Dummy;
+		DMA_InitStruct.DMA_Memory0BaseAddr = (uint32_t) &Settings->Dummy32;
 		DMA_InitStruct.DMA_MemoryInc = DMA_MemoryInc_Disable;
 	}
 	
 	/* Deinit first RX stream */
-	DMA_DeInit(Settings->RX_Stream);
+	TM_DMA_ClearFlag(Settings->RX_Stream, DMA_FLAG_ALL);
 	
 	/* Init RX stream */
 	DMA_Init(Settings->RX_Stream, &DMA_InitStruct);
@@ -181,16 +187,127 @@ uint8_t TM_SPI_DMA_Transmit(SPI_TypeDef* SPIx, uint8_t* TX_Buffer, uint8_t* RX_B
 	return 1;
 }
 
-uint8_t TM_SPI_DMA_Working(SPI_TypeDef* SPIx) {
+uint8_t TM_SPI_DMA_SendByte(SPI_TypeDef* SPIx, uint8_t value, uint16_t count) {
 	/* Get USART settings */
 	TM_SPI_DMA_INT_t* Settings = TM_SPI_DMA_INT_GetSettings(SPIx);
 	
-	/* Check if TX or RX DMA is working */
+	/* Check if DMA available */
+	if (Settings->TX_Stream->NDTR) {
+		return 0;
+	}
+	
+	/* Set dummy memory to value we specify */
+	Settings->Dummy32 = value;
+	
+	/* Set DMA peripheral address, number of bytes and disable memory increase pointer */
+	DMA_InitStruct.DMA_PeripheralBaseAddr = (uint32_t) &SPIx->DR;
+	DMA_InitStruct.DMA_BufferSize = count;
+	DMA_InitStruct.DMA_MemoryInc = DMA_MemoryInc_Disable;
+	
+	/* Configure TX DMA */
+	DMA_InitStruct.DMA_Channel = Settings->TX_Channel;
+	DMA_InitStruct.DMA_DIR = DMA_DIR_MemoryToPeripheral;
+	
+	/* Set memory size */
+	DMA_InitStruct.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+	DMA_InitStruct.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+	
+	/* Deinit first TX stream */
+	TM_DMA_ClearFlag(Settings->TX_Stream, DMA_FLAG_ALL);
+	
+	/* Init TX stream */
+	DMA_Init(Settings->TX_Stream, &DMA_InitStruct);
+	
+	/* Enable TX stream */
+	Settings->TX_Stream->CR |= DMA_SxCR_EN;
+	
+	/* Enable SPI TX DMA */
+	SPIx->CR2 |= SPI_CR2_TXDMAEN;
+	
+	/* Return OK */
+	return 1;
+}
+
+uint8_t TM_SPI_DMA_SendHalfWord(SPI_TypeDef* SPIx, uint16_t value, uint16_t count) {
+	/* Get USART settings */
+	TM_SPI_DMA_INT_t* Settings = TM_SPI_DMA_INT_GetSettings(SPIx);
+	
+	/* Check if DMA available */
+	if (Settings->TX_Stream->NDTR) {
+		return 0;
+	}
+	
+	/* Set dummy memory to value we specify */
+	Settings->Dummy16 = value;
+	
+	/* Set DMA peripheral address, number of bytes and disable memory increase pointer */
+	DMA_InitStruct.DMA_PeripheralBaseAddr = (uint32_t) &SPIx->DR;
+	DMA_InitStruct.DMA_BufferSize = count;
+	DMA_InitStruct.DMA_Memory0BaseAddr = (uint32_t) &Settings->Dummy16;
+	DMA_InitStruct.DMA_MemoryInc = DMA_MemoryInc_Disable;
+	
+	/* Configure TX DMA */
+	DMA_InitStruct.DMA_Channel = Settings->TX_Channel;
+	DMA_InitStruct.DMA_DIR = DMA_DIR_MemoryToPeripheral;
+	
+	/* Set memory size */
+	DMA_InitStruct.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
+	DMA_InitStruct.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
+	
+	/* Deinit first TX stream */
+	TM_DMA_ClearFlag(Settings->TX_Stream, DMA_FLAG_ALL);
+	
+	/* Init TX stream */
+	DMA_Init(Settings->TX_Stream, &DMA_InitStruct);
+	
+	/* Enable TX stream */
+	Settings->TX_Stream->CR |= DMA_SxCR_EN;
+	
+	/* Enable SPI TX DMA */
+	SPIx->CR2 |= SPI_CR2_TXDMAEN;
+	
+	/* Return OK */
+	return 1;
+}
+
+uint8_t TM_SPI_DMA_Working(SPI_TypeDef* SPIx) {
+	/* Get SPI settings */
+	TM_SPI_DMA_INT_t* Settings = TM_SPI_DMA_INT_GetSettings(SPIx);
+	
+	/* Check if TX or RX DMA are working */
 	return (
-		Settings->RX_Stream->NDTR || 
-		Settings->TX_Stream->NDTR ||
-		SPI_IS_BUSY(SPIx)
+		Settings->RX_Stream->NDTR || /*!< RX is working */
+		Settings->TX_Stream->NDTR || /*!< TX is working */
+		SPI_IS_BUSY(SPIx)            /*!< SPI is busy */
 	);
+}
+
+DMA_Stream_TypeDef* TM_SPI_DMA_GetStreamTX(SPI_TypeDef* SPIx) {
+	/* Return pointer to TX stream */
+	return TM_SPI_DMA_INT_GetSettings(SPIx)->TX_Stream;
+}
+
+DMA_Stream_TypeDef* TM_SPI_DMA_GetStreamRX(SPI_TypeDef* SPIx) {
+	/* Return pointer to TX stream */
+	return TM_SPI_DMA_INT_GetSettings(SPIx)->RX_Stream;
+}
+
+void TM_SPI_DMA_EnableInterrupts(SPI_TypeDef* SPIx) {
+	/* Get SPI settings */
+	TM_SPI_DMA_INT_t* Settings = TM_SPI_DMA_INT_GetSettings(SPIx);
+	
+	/* Enable interrupts for TX and RX streams */
+	TM_DMA_EnableInterrupts(Settings->TX_Stream);
+	TM_DMA_EnableInterrupts(Settings->RX_Stream);
+}
+
+void TM_SPI_DMA_DisableInterrupts(SPI_TypeDef* SPIx) {
+	/* Get SPI settings */
+	TM_SPI_DMA_INT_t* Settings = TM_SPI_DMA_INT_GetSettings(SPIx);
+	
+	/* Enable interrupts for TX and RX streams */
+	TM_DMA_DisableInterrupts(Settings->TX_Stream);
+	TM_DMA_DisableInterrupts(Settings->RX_Stream);
 }
 
 /* Private functions */
