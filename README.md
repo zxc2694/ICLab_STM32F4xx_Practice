@@ -55,11 +55,9 @@ make: *** [stm32_executable.elf] Error 1
 ```
 
 solution:
-
-https://stackoverflow.com/questions/13235748/linker-error-on-a-c-project-using-eclipse
-
-create libs.ld file
 ```
+Ref. https://stackoverflow.com/questions/13235748/linker-error-on-a-c-project-using-eclipse
+1. create libs.ld file
 GROUP(
    libgcc.a
    libg.a
@@ -67,10 +65,7 @@ GROUP(
    libm.a
    libnosys.a
  )
- ```
- 
-Makefile modify:
-
+2. Makefile modify:
 #stm32-flash
-
 CFLAGS+=-Wl,-T,libs.ld,-T,stm32_flash.ld
+```
