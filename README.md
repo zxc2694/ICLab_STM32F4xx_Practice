@@ -43,7 +43,11 @@ Learning how to develop on the STM32F4-Discovery board
  
  - sudo make install
 ```
-
+4. Install screen
+```
+ - sudo apt-get install screen
+ - [USE] sudo screen /dev/ttyUSB0 -s 9600 
+```
 ------------------
 issue1:
 ```
