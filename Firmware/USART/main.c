@@ -52,6 +52,41 @@ void send_data(char *string)
 	}
 }
 
+void int2str(int n, char *str){
+	 char buf[10] = "";
+	 int i = 0;
+	 int len = 0;
+	 int temp = n < 0 ? -n: n;
+	 if(str == NULL){
+	     return;
+	 }
+
+	 while(temp){
+	 buf[i++] = (temp % 10) + '0';
+	 temp = temp / 10;
+	 }
+	 len = n < 0 ? ++i: i;
+	 str[i] = 0;
+	 while(1){
+	     i--;
+	     if(buf[len-i-1] ==0){
+	         break;
+	     }
+	 str[i] = buf[len-i-1];
+	 }
+	 if (i == 0){
+	     str[i] = '-';
+	 }
+}
+
+void send_data_int(int data)
+{
+	char p[10];
+	int2str(data, p);
+	send_data(p);
+	send_data("\n\r");
+}
+
 int main()
 {
 	init_RCC();
@@ -60,6 +95,7 @@ int main()
 
 	while(1) {
 		send_data("Hello World!\n\r");
+		send_data_int(123);
 		delay(1000000L);		
 	}
 
