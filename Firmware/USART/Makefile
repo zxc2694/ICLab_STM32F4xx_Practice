@@ -18,7 +18,7 @@ CFLAGS+=-I./
 
 
 #stm32-flash
-CFLAGS+=-Wl,-T,stm32_flash.ld
+CFLAGS+=-Wl,-T,libs.ld,-T,stm32_flash.ld
 
 #======================================================================#
 #Libraries
