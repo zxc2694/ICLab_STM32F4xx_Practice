@@ -29,7 +29,7 @@ Learning how to develop on the STM32F4-Discovery board
 ```
 3. Install openocd:
 ```
- - https://github.com/ntfreak/openocd
+ - git clone https://github.com/ntfreak/openocd
  
  - cd openocd
  
